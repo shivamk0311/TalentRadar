@@ -8,3 +8,4 @@ class Job(BaseModel):
     salary: str 
     skills: list[str]
     source: str 
+    employment_type: str

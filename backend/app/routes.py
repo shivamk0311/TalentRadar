@@ -1,5 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.models import Job
+from app.database import get_db
+from app.db_models import JobDB
+from sqlalchemy.orm import Session
+
+
 
 
 router = APIRouter()
@@ -7,27 +12,41 @@ router = APIRouter()
 jobs = []
 
 @router.post('/jobs')
-def create_job(job : Job):
-    job_data = job.model_dump()
-    job_data['id'] = len(jobs) + 1
-    jobs.append(job_data)
+def create_job(job : Job, db : Session = Depends(get_db)):
+    new_job = JobDB(
+        title = job.title,
+        company = job.company,
+        location = job.location,
+        description = job.description,
+        salary = job.salary,
+        source = job.source,
+        employment_type = job.employment_type
+    )
+
+    db.add(new_job)
+    db.commit()
+    db.refresh(new_job)
+    
     return {
         "message": "Job created successfully",
-        "job" : job_data
+        "job" : new_job
     }
 
 @router.get('/jobs')
-def get_jobs():
+def get_jobs(db: Session = Depends(get_db)):
+    jobs = db.query(JobDB).all()
     return jobs 
 
 @router.get('/jobs/{id}')
-def get_job_by_id(id : int):
-    
-    for job in jobs:
-        if job['id'] == id:
-            return job
+def get_job_by_id(id : int, db: Session=Depends(get_db)):
+
+    job = db.query(JobDB).filter(JobDB.id == id).first()
+
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found.")
+
+    return job
         
-    raise HTTPException(status_code=404, detail="Job not found.")
 
 @router.put('/jobs/{id}')
 def update_job(id: int, updated_job: Job):
