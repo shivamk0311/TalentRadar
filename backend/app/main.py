@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from app.routes import router
+from app.routes.jobs import router as jobs_router
 from app.database import engine, Base
-from app import db_models
 
 Base.metadata.create_all(bind=engine)
 
@@ -11,5 +10,5 @@ app = FastAPI(
     version = '0.1.0'
 )
 
-app.include_router(router)
+app.include_router(jobs_router)
 
