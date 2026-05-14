@@ -11,6 +11,10 @@ router = APIRouter()
 
 jobs = []
 
+
+#--------------------------------
+#  Create Job
+#--------------------------------
 @router.post('/jobs')
 def create_job(job : Job, db : Session = Depends(get_db)):
     new_job = JobDB(
@@ -32,10 +36,22 @@ def create_job(job : Job, db : Session = Depends(get_db)):
         "job" : new_job
     }
 
+
+
+#--------------------------------
+#  Get all jobs
+#--------------------------------
+
 @router.get('/jobs')
 def get_jobs(db: Session = Depends(get_db)):
     jobs = db.query(JobDB).all()
     return jobs 
+
+
+
+#--------------------------------
+#  Get Job By ID
+#--------------------------------
 
 @router.get('/jobs/{id}')
 def get_job_by_id(id : int, db: Session=Depends(get_db)):
@@ -48,33 +64,59 @@ def get_job_by_id(id : int, db: Session=Depends(get_db)):
     return job
         
 
-@router.put('/jobs/{id}')
-def update_job(id: int, updated_job: Job):
+#--------------------------------
+#  Update Job By ID
+#--------------------------------
 
-    for index, job in enumerate(jobs):
-        if job['id'] == id:
-            updated_job_data = updated_job.model_dump()
-            updated_job_data['id'] = id 
-            jobs[index] = updated_job_data
-            return {
-                "message": "Job updated successfully",
-                "deleted_job": updated_job_data
-            }
+@router.put('/jobs/{id}')
+def update_job(id: int, updated_job: Job, db: Session = Depends(get_db)):
+
+    job = db.query(JobDB).filter(JobDB.id == id).first()
+
+    if job is None:
+        raise HTTPException(status_code=404, detail='Job not found')
+
+
+    job.title = updated_job.title
+    job.company = updated_job.company
+    job.location = updated_job.location
+    job.description = updated_job.description
+    job.salary = updated_job.salary
+    job.source = updated_job.source
+    job.employment_type = updated_job.employment_type
+
+    db.commit()
+    db.refresh(job)
+
     
-    raise HTTPException(status_code=404, detail='Job not found')
+    return {
+        "message": "Job updated successfully",
+        "job": job
+    }
+
+
+#--------------------------------
+#  Delete Job By ID
+#--------------------------------
 
 @router.delete('/jobs/{id}')
-def delete_job(id : int):
+def delete_job(id : int, db: Session= Depends(get_db)):
     
-    for job in jobs:
-        if job['id'] == id:
-            jobs.remove(job)
-            return {
-                "message": "Job deleted successfully",
-                "deleted_job": job
-            }
+    job = db.query(JobDB).filter(JobDB.id == id).first()
+
+    if job is None:
+        raise HTTPException(status_code=404, detail='Job not found')
+
+    db.delete(job)
+    db.commit()
+
+    return {
+        "message": "Job deleted successfully",
+    }
     
-    raise HTTPException(status_code=404, detail='Job not found')
+#--------------------------------
+#  Search Jobs By Skills
+#--------------------------------
 
 @router.get('/jobs/search/{skill}')
 def search_job(skill):
@@ -87,6 +129,9 @@ def search_job(skill):
     return matched_jobs
     
 
+#--------------------------------
+#  API Endpoint Health Check
+#--------------------------------
 @router.get('/health')
 def health_check():
     return {'status': 'ok'}
