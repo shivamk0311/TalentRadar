@@ -1,4 +1,4 @@
-from app.schemas.job import JobCreate
+from app.schemas.job import JobCreate, JobResponse
 from app.models.job import JobDB
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
@@ -20,7 +20,7 @@ jobs = []
 #--------------------------------
 #  Create Job
 #--------------------------------
-@router.post('/jobs')
+@router.post('/jobs', response_model = JobResponse)
 def create_job(job : JobCreate, db : Session = Depends(get_db)):
 
     return create_job(db, job)
@@ -31,7 +31,7 @@ def create_job(job : JobCreate, db : Session = Depends(get_db)):
 #  Get all jobs
 #--------------------------------
 
-@router.get('/jobs')
+@router.get('/jobs', response_model = list[JobResponse])
 def get_jobs(db: Session = Depends(get_db)):
 
     return get_all_jobs(db)
@@ -42,7 +42,7 @@ def get_jobs(db: Session = Depends(get_db)):
 #  Get Job By ID
 #--------------------------------
 
-@router.get('/jobs/{id}')
+@router.get('/jobs/{id}', response_model = JobResponse)
 def get_requested_job(id : int, db: Session=Depends(get_db)):
 
     job = get_job_by_id(db, id)
@@ -57,7 +57,7 @@ def get_requested_job(id : int, db: Session=Depends(get_db)):
 #  Update Job By ID
 #--------------------------------
 
-@router.put('/jobs/{id}')
+@router.put('/jobs/{id}', response_model = JobResponse)
 def update_existing_job(id: int, updated_job: JobCreate, db: Session = Depends(get_db)):
 
     job = update_job(db, id, updated_job)
