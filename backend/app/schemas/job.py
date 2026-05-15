@@ -7,7 +7,7 @@ class JobCreate(BaseModel):
     location: str
     description: str
     salary: str | None = None
-    skills: list[str]
+    skills: list[str] | None = None
     source: str | None = None
     employment_type: str | None = None
 
@@ -18,7 +18,7 @@ class JobResponse(BaseModel):
     location: str
     description: str
     salary: str | None = None
-    skills: list[str]
+    skills: list[str] | None = None 
     source: str | None = None
     employment_type: str | None = None
 

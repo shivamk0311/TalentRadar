@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ARRAY
 from app.database import Base
 
 class JobDB(Base):
@@ -10,5 +10,6 @@ class JobDB(Base):
     location = Column(String, nullable=False)
     description = Column(String, nullable=False)
     salary = Column(String, nullable=True)
+    skills = Column(ARRAY(String), nullable=True)
     source = Column(String, nullable=True)
     employment_type = Column(String, nullable=True)

@@ -10,6 +10,7 @@ def create_job(db: Session, job: JobCreate):
         location=job.location,
         description=job.description,
         salary=job.salary,
+        skills=job.skills,
         source=job.source,
         employment_type=job.employment_type
     )
@@ -49,6 +50,7 @@ def update_job(db: Session, job_id: int, updated_job: JobCreate):
     job.location = updated_job.location
     job.description = updated_job.description
     job.salary = updated_job.salary
+    job.skills = updated_job.skills
     job.source = updated_job.source
     job.employment_type = updated_job.employment_type
 
@@ -56,3 +58,6 @@ def update_job(db: Session, job_id: int, updated_job: JobCreate):
     db.refresh(job)
 
     return job
+
+def search_job_by_skill(db: Session, skill: str):
+    return db.query(JobDB).filter(JobDB.skills.any(skill)).all()

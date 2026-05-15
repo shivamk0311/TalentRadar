@@ -9,6 +9,7 @@ from app.repositories.job_repository import (
     get_all_jobs,
     get_job_by_id,
     delete_job,
+    search_job_by_skill,
     update_job
 )
 
@@ -21,7 +22,7 @@ jobs = []
 #  Create Job
 #--------------------------------
 @router.post('/jobs', response_model = JobResponse)
-def create_job(job : JobCreate, db : Session = Depends(get_db)):
+def create_new_job(job : JobCreate, db : Session = Depends(get_db)):
 
     return create_job(db, job)
 
@@ -91,15 +92,10 @@ def delete_job_by_id(id : int, db: Session= Depends(get_db)):
 #  Search Jobs By Skills
 #--------------------------------
 
-@router.get('/jobs/search/{skill}')
-def search_job(skill):
-    matched_jobs = []
-    for job in jobs:
-        for job_skill in job["skills"]:
-            if job_skill.lower() == skill.lower():
-                matched_jobs.append(job)
+@router.get('/jobs/search/skill/{skill}', response_model=list[JobResponse])
+def search_job(skill : str, db: Session=Depends(get_db)):
             
-    return matched_jobs
+    return search_job_by_skill(db, skill)
     
 
 #--------------------------------
