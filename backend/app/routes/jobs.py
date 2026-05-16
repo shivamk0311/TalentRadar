@@ -3,6 +3,7 @@ from app.models.job import JobDB
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
+from app.services.job_service import create_job_service
 
 from app.repositories.job_repository import (
     create_job,
@@ -24,7 +25,7 @@ jobs = []
 @router.post('/jobs', response_model = JobResponse)
 def create_new_job(job : JobCreate, db : Session = Depends(get_db)):
 
-    return create_job(db, job)
+    return create_job_service(db, job)
 
 
 
