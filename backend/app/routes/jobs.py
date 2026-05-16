@@ -3,21 +3,16 @@ from app.models.job import JobDB
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.services.job_service import create_job_service
+from app.services.job_service import create_job_service, update_job_service
 
 from app.repositories.job_repository import (
-    create_job,
     get_all_jobs,
     get_job_by_id,
     delete_job,
     search_job_by_skill,
-    update_job
 )
 
 router = APIRouter()
-
-jobs = []
-
 
 #--------------------------------
 #  Create Job
@@ -62,15 +57,12 @@ def get_requested_job(id : int, db: Session=Depends(get_db)):
 @router.put('/jobs/{id}', response_model = JobResponse)
 def update_existing_job(id: int, updated_job: JobCreate, db: Session = Depends(get_db)):
 
-    job = update_job(db, id, updated_job)
+    job = update_job_service(db, id, updated_job)
 
     if job is None:
         raise HTTPException(status_code=404, detail='Job not found')
     
-    return {
-        "message": "Job updated successfully",
-        "job": job
-    }
+    return job
 
 
 #--------------------------------

@@ -1,5 +1,5 @@
 from app.schemas.job import JobCreate
-from app.repositories.job_repository import create_job
+from app.repositories.job_repository import create_job, update_job
 
 def normalize_skills(skills: list[str]):
     acronym_map = {
@@ -28,7 +28,18 @@ def normalize_skills(skills: list[str]):
     
     return cleaned_skills
 
-def create_job_service(db, job: JobCreate):
+
+def normalize_job(job: JobCreate):
     job.skills = normalize_skills(job.skills)
 
-    return create_job(db, job)
+    return job
+
+
+def create_job_service(db, job: JobCreate):
+    candidate = normalize_job(job)
+    return create_job(db, candidate)
+
+
+def update_job_service(db, job_id: int, updated_job: JobCreate):
+    updated_job = normalize_job(updated_job)
+    return update_job(db, job_id, updated_job)
